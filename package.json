@@ -10,6 +10,7 @@
     "migrate": "prisma migrate dev --schema=database/schema.prisma",
     "generate": "prisma generate --schema=database/schema.prisma",
     "studio": "prisma studio --schema=database/schema.prisma",
+    "postinstall": "prisma generate --schema=database/schema.prisma",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:unit": "jest",
