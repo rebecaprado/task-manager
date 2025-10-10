@@ -25,6 +25,7 @@ async function sendEmail({ to, subject, text }: { to: string, subject: string, t
 
 // BetterAuth configuration
 export const auth = betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     emailVerification: {
       // Send verification email on sign up, but don't require the verification yet
       sendOnSignUp: true,
