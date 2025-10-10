@@ -15,13 +15,16 @@ import { useForm } from "react-hook-form";
 import { signUpSchema, SignUpFormSchema } from "schemas/signUpSchema";
 import { User, Loader2 } from 'lucide-react';
 import { signUp } from "@/lib/sign-up";
+import { signIn } from "@/lib/sign-in";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { signInWithGithub } from "@/lib/auth-client";
 import { Computer } from "lucide-react";
+import { useAuthStore } from "authstore/authStore";
 
 export default function SignUpForm() {
     const router = useRouter();
+    const setUser = useAuthStore((state) => state.setUser);
 
     const form = useForm<SignUpFormSchema>({
         resolver: zodResolver(signUpSchema),
@@ -53,9 +56,27 @@ export default function SignUpForm() {
             return;
         }
 
-        // If there's no error, display success message
-        toast.success("Conta criada com sucesso! Um e-mail de verificação foi enviado para você.");
-        router.push("/sign-in");
+        // If there's no error, login automatically
+        toast.success("Conta criada com sucesso!");
+        
+        // Auto login após cadastro
+        const loginResult = await signIn(data.email, data.password);
+        
+        if (!loginResult?.error) {
+            // Set user in store
+            setUser(
+                loginResult?.data?.user
+                    ? { ...loginResult.data.user, image: loginResult.data.user.image ?? undefined }
+                    : null
+            );
+            // Redirect to dashboard
+            setTimeout(() => {
+                router.replace("/dashboard");
+            }, 100);
+        } else {
+            // Se falhar o auto-login, vai para sign-in
+            router.push("/sign-in");
+        }
     }
 
     return (
