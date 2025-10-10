@@ -24,14 +24,12 @@ export default function ProfileForm({ user }: Props) {
     resolver: zodResolver(userProfileSchema),
     defaultValues: {
       name: user.name ?? "",
-      image: user.image ?? "",
     },
   });
 
   const onSubmit = (values: UserProfileForm) => {
     const fd = new FormData();
     fd.append("name", values.name);
-    fd.append("image", values.image ?? "");
     startTransition(async () => {
       const res = await updateProfileAction(fd);
       if (res?.success) toast?.success(res.message ?? "Perfil atualizado!");
@@ -41,45 +39,31 @@ export default function ProfileForm({ user }: Props) {
   };
 
   return (
-    <div className="rounded-2xl border p-4">
+    <div className="rounded-xl sm:rounded-2xl border p-3 sm:p-4 md:p-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-3 sm:gap-4">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="name">Nome</FormLabel>
+                <FormLabel htmlFor="name" className="text-sm sm:text-base">Nome</FormLabel>
                 <FormControl>
-                  <Input id="name" placeholder="Seu nome" {...field} />
+                  <Input id="name" placeholder="Seu nome" className="text-sm sm:text-base h-10 sm:h-11" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
 
-          <div className="grid gap-1">
-            <label className="text-sm font-medium" htmlFor="email">Email</label>
-            <Input id="email" value={user.email} disabled />
-            <p className="text-xs text-muted-foreground">Este campo não é editável.</p>
+          <div className="grid gap-1 sm:gap-1.5">
+            <label className="text-sm sm:text-base font-medium" htmlFor="email">Email</label>
+            <Input id="email" value={user.email} disabled className="text-sm sm:text-base h-10 sm:h-11 bg-gray-100" />
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Este campo não é editável.</p>
           </div>
 
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="image">Avatar URL</FormLabel>
-                <FormControl>
-                  <Input id="image" placeholder="https://…" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <div className="pt-2">
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-sm sm:text-base h-10 sm:h-11">
               {isPending ? "Salvando…" : "Salvar alterações"}
             </Button>
           </div>

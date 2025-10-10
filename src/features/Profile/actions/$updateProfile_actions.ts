@@ -13,7 +13,6 @@ export async function updateProfileAction(formData: FormData) {
 
   const parsed = userProfileSchema.safeParse({
     name: formData.get("name"),
-    image: formData.get("image"),
   });
 
   if (!parsed.success) {
@@ -29,7 +28,6 @@ export async function updateProfileAction(formData: FormData) {
       where: { id: session.user.id },
       data: {
         name: parsed.data.name,
-        image: parsed.data.image ?? null,
       },
     });
 
