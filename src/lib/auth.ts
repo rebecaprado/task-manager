@@ -45,7 +45,7 @@ export const auth = betterAuth({
     emailAndPassword: {  
         enabled: true,
         // In order to require the verification before login, we set requireEmailVerification to true
-        requireEmailVerification: true,
+        requireEmailVerification: false,
         sendResetPassword: async ({user, url}) => {
             await sendEmail({
               to: user.email,
