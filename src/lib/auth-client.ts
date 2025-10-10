@@ -32,8 +32,18 @@ export async function handleResetPassword(newPassword: string) {
 }
 
 export async function resendVerificationEmail(email: string) {
-    return await authClient.sendVerificationEmail({
-        email,
-        callbackURL: "/sign-in",
+    // BetterAuth usa a rota sendVerificationEmail diretamente
+    const response = await fetch('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
     });
+    
+    if (!response.ok) {
+        throw new Error('Erro ao enviar email');
+    }
+    
+    return await response.json();
 }
