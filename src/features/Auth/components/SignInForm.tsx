@@ -17,14 +17,18 @@ import { loginSchema, LoginForm } from "schemas/loginSchema";
 import { useAuthStore } from "authstore/authStore";
 import { signIn } from "@/lib/sign-in";
 import { Loader2, LogIn, Computer } from "lucide-react";
-import { signInWithGithub } from "@/lib/auth-client";
+import { signInWithGithub, resendVerificationEmail } from "@/lib/auth-client";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignInForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
 
   // Get the setUser function from the auth store
   const setUser = useAuthStore((state) => state.setUser);
@@ -39,11 +43,14 @@ export default function SignInForm() {
   })
 
   async function onSubmit(data: LoginForm) {
+    setEmailNotVerified(false); // Reset
+    
     // Call the signIn function
     const result = await signIn(data.email, data.password);
 
     // If the user's email is not verified, display error
     if (result?.error?.status === 403) {
+      setEmailNotVerified(true);
       form.setError("email", {
         message: "Por favor, confirme seu e-mail para acessar sua conta.",
       });
@@ -67,6 +74,24 @@ export default function SignInForm() {
     setTimeout(() => {
       router.replace(callbackUrl);
     }, 100);
+  }
+
+  async function handleResendEmail() {
+    const email = form.getValues("email");
+    if (!email) {
+      toast.error("Por favor, digite seu e-mail");
+      return;
+    }
+
+    setResendingEmail(true);
+    try {
+      await resendVerificationEmail(email);
+      toast.success("E-mail de verificação reenviado! Verifique sua caixa de entrada.");
+    } catch {
+      toast.error("Erro ao reenviar e-mail. Tente novamente.");
+    } finally {
+      setResendingEmail(false);
+    }
   }
 
   return (
@@ -107,6 +132,33 @@ export default function SignInForm() {
             Esqueci minha senha
           </Link>
         </div>
+        
+        {/* Botão para reenviar email de verificação */}
+        {emailNotVerified && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+            <p className="text-xs sm:text-sm text-yellow-800 mb-2">
+              Não recebeu o link de verificação de e-mail?
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResendEmail}
+              disabled={resendingEmail}
+              className="w-full text-xs sm:text-sm h-9"
+            >
+              {resendingEmail ? (
+                <>
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                  Reenviando...
+                </>
+              ) : (
+                "Clique aqui para reenviar"
+              )}
+            </Button>
+          </div>
+        )}
+        
         {form.formState.errors.root && (
         <p className="text-xs sm:text-sm text-red-500">
           {form.formState.errors.root.message}

@@ -30,3 +30,10 @@ export async function handleResetPassword(newPassword: string) {
       token,
     });
 }
+
+export async function resendVerificationEmail(email: string) {
+    return await authClient.sendVerificationEmail({
+        email,
+        callbackURL: "/sign-in",
+    });
+}
